@@ -19,7 +19,7 @@ jobs:
         node-version: '18.19.1'
 
     - name: Install dependencies
-      run: npm i
+      run: npm install
 
     - name: Build the Next.js application
       run: npm run build
@@ -49,8 +49,9 @@ jobs:
         chmod 600 ec2-key.pem
         scp -i ec2-key.pem -o StrictHostKeyChecking=no build/build.zip $EC2_USER@$EC2_HOST:~/build.zip
         ssh -i ec2-key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
-          unzip -o ~/build.zip -d ~/Helloworld-Nextjs/
           cd ~/Helloworld-Nextjs
-          npm i
-          pm2 restart nextjs-app || pm2 start npm --name "nextjs-app" -- run dev
+          unzip -o ~/build.zip -d .
+          npm install
+          npm run build
+          pm2 restart nextjs-app || pm2 start npm --name "nextjs-app" -- start
         EOF

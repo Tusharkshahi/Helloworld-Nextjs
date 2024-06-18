@@ -3,7 +3,7 @@ name: Deploy Next.js App to EC2
 on:
   push:
     branches:
-      - main  # Deploy only when code is pushed to the main 
+      - main  # Deploy only when code is pushed to the main branch
 
 jobs:
   deploy:
@@ -45,10 +45,12 @@ jobs:
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
       run: |
-        scp -i $EC2_KEY -o StrictHostKeyChecking=no build/build.zip $EC2_USER@$EC2_HOST:~/build.zip
-        ssh -i $EC2_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+        echo "$EC2_KEY" > ec2-key.pem
+        chmod 600 ec2-key.pem
+        scp -i ec2-key.pem -o StrictHostKeyChecking=no build/build.zip $EC2_USER@$EC2_HOST:~/build.zip
+        ssh -i ec2-key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
           unzip -o ~/build.zip -d ~/Helloworld-Nextjs/
           cd ~/Helloworld-Nextjs
           npm i
-          npm run dev
+          pm2 restart nextjs-app || pm2 start npm --name "nextjs-app" -- run dev
         EOF

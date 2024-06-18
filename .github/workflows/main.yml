@@ -52,5 +52,5 @@ jobs:
           unzip -o ~/build.zip -d ~/Helloworld-Nextjs/
           cd ~/Helloworld-Nextjs
           npm i
-          npm run dev &
+          pm2 restart nextjs-app || pm2 start npm --name "nextjs-app" -- run dev
         EOF
